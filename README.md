@@ -97,10 +97,10 @@ Created a **Resource Group** and the following services:
 ## 📸 Screenshots
 
 > 📌 ADF Pipeline Flow  
-![ADF Pipeline](./)
+![ADF Pipeline](./ADF_pipeline.png)
 
 > 📌 ForEach Transformation Setup  
-![ForEach](./)
+![ForEach](./Synapse_pipeline.png)
 
 ---
 

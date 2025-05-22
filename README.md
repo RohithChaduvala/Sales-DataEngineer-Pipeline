@@ -1,86 +1,115 @@
-# End-to-End Sales Data Pipeline using Azure Data Factory and PySpark
-
-This project demonstrates a full-scale **Data Engineering workflow** using a medallion architecture (Bronze → Silver → Gold) to process sales data sourced from an **on-premises SQL Server** into **Azure Data Lake Storage (ADLS)** using **Azure Data Factory (ADF)** and transformed with **PySpark** in **Databricks**.
 
 ---
 
-## 🧱 Architecture: Medallion Layers
+## 🛠️ End-to-End Process
 
-### 1. Bronze Layer (Raw Ingestion)
-- Data copied using ADF from on-prem SQL Server to **ADLS Gen2** in **Parquet** format.
-- Uses `Lookup` + `ForEach` activity in ADF to dynamically loop through all tables in the `SalesLT` schema.
-- Query used in Lookup:
-  ```sql
-  SELECT s.name AS SchemaName, t.Name AS TableName
-  FROM sys.tables t
-  INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
-  WHERE s.name = 'SalesLT'
-Dynamic query in ForEach:
+### 1. ✅ SQL Server Setup (On-Premise)
+- Installed **SQL Server 2022 Express** & **SSMS** locally.
+- Restored `AdventureWorksLT2022.bak` database from Microsoft.
 
-python
-Copy
-Edit
-@{concat('select * from ', item().SchemaName, '.', item().TableName)}
-2. Silver Layer (Cleansed Data)
-Notebook: bronze_to_silver-extended.ipynb
+### 2. ✅ Azure Setup
+Created a **Resource Group** and the following services:
+- **Data Factory**: For orchestration
+- **Data Lake Storage**: For Bronze → Silver → Gold data
+- **Databricks**: For transformations using PySpark
+- **Synapse Analytics**: For procedures + integration
+- **Power BI**: For data visualization
 
-Tasks:
+---
 
-Reads parquet files from Bronze layer.
+## 🔄 Data Pipeline Stages
 
-Applies necessary transformations (e.g., dropping nulls, type conversions).
+### 🔹 ADF: Bronze Layer
 
-Stores cleaned output back to ADLS in Silver zone (in Parquet format).
+- Created `Copy Data` pipeline to load data from on-prem SQL Server to **Bronze** container in Data Lake.
+- Used **Linked Service** for SQL Server & Data Lake connection.
+- In `ForEach` activity:
+  - **Lookup Query**:
+    ```sql
+    SELECT s.name AS SchemaName, t.Name AS TableName
+    FROM sys.tables t
+    INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
+    WHERE s.name = 'SalesLT'
+    ```
+  - **Query for Each Table**:
+    ```json
+    @{concat('SELECT * FROM ', item().SchemaName, '.', item().TableName)}
+    ```
 
-Includes intentional errors to simulate common mistakes and help in debugging.
+> 📤 Output: Raw data in `.parquet` format in Bronze folder.
 
-3. Gold Layer (Business Aggregations)
-Notebook: silver_to_gold_transformation.ipynb
+---
 
-Tasks:
+### 🔸 Databricks: Silver & Gold Layers
 
-Reads refined data from Silver layer.
+- **Mounted the Data Lake** inside Databricks
+- Transformed data:
+  - Cleaned nulls
+  - Standardized columns
+  - Filtered data
+- **bronze to silver-extended.ipynb**: Bronze → Silver  
+- **silver to Gold transformation.ipynb**: Silver → Gold
 
-Performs joins, aggregations, and filtering.
+> 🧪 Cluster Type: Single Node  
+> 📦 Output Format: `.parquet` files in Silver & Gold folders
 
-Outputs to the Gold layer for reporting and analytics.
+---
 
-📁 Folder Structure
-project-root/
-├── bronze_to_silver-extended.ipynb
-├── silver_to_gold_transformation.ipynb
-├── Sales_dash.pbix (optional - Power BI dashboard, not used currently)
-├── README.md
+### 🔹 Synapse Analytics: Stored Procedure Integration
 
-🧪 Common Mistakes & Debugging Tips
-Errors in the notebooks are intentional to help you identify:
+- Used `GetMetadata` and `Stored Procedure` activities
+- Created and triggered stored procedures to load structured data
 
-Issues with Spark session or file path
+---
 
-Data type mismatches
+### 📈 Power BI: Sales KPI Dashboard
 
-File not found errors
+- Connected to Azure Data Lake using **Power BI Desktop**
+- Visualized:
+  - Total Sales
+  - Products Sold
+  - Gender Split
+  - Category-wise breakdown
+- Slicers: Gender, Product Category, Date Range
 
-Schema mismatches
+---
 
-Each section is commented to explain what it does, why it might fail, and how to resolve it.
+## 🚧 Improvements (To Be Made)
 
-🛠 Technologies Used
-Azure Data Factory
+- Add visual filters to switch between raw → processed data
+- Display null/missing value stats in Power BI
+- Add interactive date filters & annotations
+- Upload .csv exports for downloadable insights
 
-Azure Data Lake Storage Gen2
+---
 
-Azure Databricks (PySpark)
+## 💡 Key Learnings
 
-On-Premises SQL Server (via Self-Hosted Integration Runtime)
+- Hands-on with Data Lake and ADF pipelines
+- Managed layered architecture (Bronze → Silver → Gold)
+- Understood real-time integration between ADF and Databricks
+- Applied parameterized pipeline design
+- Data transformation using PySpark
+- Deployment-ready visualization with Power BI
 
-Parquet File Format
+---
 
- Power BI for visualization
+## 📸 Screenshots
 
-🚀 Future Improvements
-Develop monitoring dashboards (e.g., using Azure Monitor or Power BI)
+> 📌 ADF Pipeline Flow  
+![ADF Pipeline](./)
 
-🙋‍♂️ Author
-Rohith Chaduvala
-GitHub: RohithChaduvala
+> 📌 ForEach Transformation Setup  
+![ForEach](./)
+
+---
+
+## 🧠 Author
+
+**Rohith Chaduvala**  
+💼 Data Engineering Enthusiast | Azure | Python | PySpark    
+🔗 GitHub: [RohithChaduvala](https://github.com/RohithChaduvala)
+
+---
+
+> ⭐ *Star this repo if it helped you or gave you project inspiration!*

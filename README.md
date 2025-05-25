@@ -107,7 +107,7 @@ Created a **Resource Group** and the following services:
 ## 🧠 Author
 
 **Rohith Chaduvala**  
-💼 Data Engineering Enthusiast | Azure | Python | PySpark    
+💼 Data Engineering Enthusiast | Azure | Python | PySpark | 
 🔗 GitHub: [RohithChaduvala](https://github.com/RohithChaduvala)
 
 ---
